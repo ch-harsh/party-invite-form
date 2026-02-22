@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
+import "./globals.css";
 
 export default function Home() {
   const [formData, setFormData] = useState({
@@ -8,91 +9,78 @@ export default function Home() {
     email: "",
     phone: "",
   });
+
+ 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const res = await fetch("/api/submit", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
+    try {
+      const res = await fetch("/api/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-    if (res.ok) {
-      alert("Invitation saved successfully 🎉");
-      setFormData({ name: "", email: "", phone: "" });
-    } else {
-      alert("Something went wrong");
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Invitation saved successfully 🎉");
+        setFormData({ name: "", email: "", phone: "" });
+      } else {
+        alert(data.error || "Something went wrong");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Server error. Please try again.");
     }
   };
+
   return (
-    <div style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      height: "100vh",
-      background: "linear-gradient(135deg, #ff758c, #ff7eb3)"
-    }}>
-      <div style={{
-        background: "white",
-        padding: "40px",
-        borderRadius: "10px",
-        width: "350px",
-        boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
-        textAlign: "center"
-      }}>
+    <div className="container">
+      <div className="form-card">
         <h1>🎉 Party Invitation Form</h1>
-        <p>Please fill your details to receive invite</p>
-  
+        <p>Please fill in your details to receive an invite.</p>
+
         <form onSubmit={handleSubmit}>
           <input
             type="text"
+            name="name"
             placeholder="Full Name"
             required
             value={formData.name}
-            onChange={(e) =>
-              setFormData({ ...formData, name: e.target.value })
-            }
-            style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
+            onChange={handleChange}
           />
-  
+
           <input
             type="email"
-            placeholder="Email"
+            name="email"
+            placeholder="Email Address"
             required
             value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
-            style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
+            onChange={handleChange}
           />
-  
+
           <input
             type="tel"
-            placeholder="Phone"
+            name="phone"
+            placeholder="Phone Number"
             required
             value={formData.phone}
-            onChange={(e) =>
-              setFormData({ ...formData, phone: e.target.value })
-            }
-            style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
+            onChange={handleChange}
           />
-  
-          <button
-            type="submit"
-            style={{
-              width: "100%",
-              padding: "10px",
-              background: "#ff758c",
-              color: "white",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer"
-            }}
-          >
-            Submit
-          </button>
+
+          <button type="submit">Submit</button>
         </form>
       </div>
     </div>
